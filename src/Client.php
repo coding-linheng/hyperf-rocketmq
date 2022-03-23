@@ -2,57 +2,60 @@
 
 namespace Codelin\HyperfRocketmq;
 
-use Hyperf\Context\Context;
 use Hyperf\Contract\ConfigInterface;
 use MQ\MQClient;
+use MQ\MQConsumer;
+use MQ\MQProducer;
+use MQ\MQTransProducer;
 
-/**
- * @method getProducer(string $instanceId, string $topicName)
- * @method getTransProducer(string $instanceId, string $topicName, string $groupId)
- * @method getConsumer(string $instanceId, string $topicName, string $consumer, string $messageTag)
- * @mixin
- */
 class Client
 {
-    protected ConfigInterface $config;
+    protected array $config;
+
+    protected array $ClientConfig;
 
 
     public function __construct(ConfigInterface $config)
     {
+        $config = $config->get('rocketmq');
+        if (empty($config)) {
+            throw new \RuntimeException('Please publish rocketmq configuration');
+        }
         $this->config = $config;
     }
 
-
-    public function __call(string $name, array $arguments)
+    public function getClient(string $name = 'default'): MQClient
     {
-        $client = $this->getClient('default');
+        $this->configure($name);
+        return make(MQClient::class, $this->ClientConfig);
+    }
 
-        if (method_exists($client, $name)) {
-            return call_user_func_array([$client, $name], $arguments);
-        }
+    public function getProducer(string $name = 'default'): MQProducer
+    {
+        $client = $this->getClient($name);
+        return make(MQProducer::class, $this->ClientConfig);
+    }
 
-        throw new \RuntimeException('Method not defined. method:' . $name);
+    public function getTransProducer(string $name = 'default'): MQTransProducer
+    {
+        $client = $this->getClient($name);
+        return make(MQTransProducer::class, $this->ClientConfig);
+    }
+
+    public function getConsumer(string $name = 'default'): MQConsumer
+    {
+        $client = $this->getClient($name);
+        return make(MQConsumer::class, $this->ClientConfig);
     }
 
     private function configure(string $name)
     {
-        if ($this->config[$name]) {
+        if (!$this->config[$name]) {
             throw new \InvalidArgumentException("Configuration does not exist");
         }
 
-        $config = $this->config[$name];
-
-        $client = new MQClient($config['end_point'], $config['access_id'], $config['access_key']);
-
-        return Context::set('hyperf-rocketmq', $client);
+        $this->ClientConfig = $this->config[$name];
     }
 
-    public function getClient(string $name)
-    {
-        if (!empty(Context::get('hyperf-rocketmq'))) {
-            return Context::get('hyperf-rocketmq');
-        }
 
-        return $this->configure($name);
-    }
 }
