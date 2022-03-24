@@ -2,8 +2,9 @@
 
 namespace Codelin\HyperfRocketmq;
 
+use Hyperf\Context\Context;
 use Hyperf\Contract\ConfigInterface;
-use MQ\MQClient;
+use MQ\Http\HttpClient;
 use MQ\MQConsumer;
 use MQ\MQProducer;
 use MQ\MQTransProducer;
@@ -14,7 +15,6 @@ class Client
 
     protected array $ClientConfig;
 
-
     public function __construct(ConfigInterface $config)
     {
         $config = $config->get('rocketmq');
@@ -24,31 +24,36 @@ class Client
         $this->config = $config;
     }
 
-    public function getClient(string $name = 'default'): MQClient
+    public function getClient(string $name = 'default'): HttpClient
     {
-        $this->configure($name);
-        return make(MQClient::class, $this->ClientConfig);
+        $client = Context::get($this->getKey($name));
+        if (empty($client)) {
+            $this->configure($name);
+            $client = Context::set($this->getKey($name), make(HttpClient::class, $this->ClientConfig));
+        }
+
+        return $client;
     }
 
     public function getProducer(string $name = 'default'): MQProducer
     {
-        $client = $this->getClient($name);
+        $this->setClient($name);
         return make(MQProducer::class, $this->ClientConfig);
     }
 
     public function getTransProducer(string $name = 'default'): MQTransProducer
     {
-        $client = $this->getClient($name);
+        $this->setClient($name);
         return make(MQTransProducer::class, $this->ClientConfig);
     }
 
     public function getConsumer(string $name = 'default'): MQConsumer
     {
-        $client = $this->getClient($name);
+        $this->setClient($name);
         return make(MQConsumer::class, $this->ClientConfig);
     }
 
-    private function configure(string $name)
+    protected function configure(string $name)
     {
         if (!$this->config[$name]) {
             throw new \InvalidArgumentException("Configuration does not exist");
@@ -57,5 +62,13 @@ class Client
         $this->ClientConfig = $this->config[$name];
     }
 
+    protected function getKey(string $name): string
+    {
+        return sprintf('rocketmq:%s', $name);
+    }
 
+    protected function setClient(string $name)
+    {
+        $this->ClientConfig['client'] = $this->getClient($name);
+    }
 }
