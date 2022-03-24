@@ -19,7 +19,7 @@ php bin/hyperf.php vendor:publish coding-linheng/hyperf-rocketmq
 
 ## 使用
 
-> 以下是伪代码，仅供参考。Auth 注解可以用于类或者方法。
+> 以下是伪代码，仅供参考
 
 ```php
 <?php
