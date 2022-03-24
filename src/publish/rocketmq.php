@@ -13,13 +13,14 @@ declare(strict_types=1);
 
 return [
     'default' => [
-        'end_point'      => '',  // 设置HTTP接入域名
-        'access_id'      => '', //AccessKey 阿里云身份验证，在阿里云服务器管理控制台创建
-        'access_key'     => '',  // SecretKey 阿里云身份验证，在阿里云服务器管理控制台创建
-        'security_token' => '',  // 来自阿里云的securityToken
-        'topic'          => '', // 所属的 Topic
-        'instance_id'    => null, // Topic所属实例ID，默认实例为空NULL
-        'group_id'       => null, // 分组
-        'message_tag'    => [],   // 标签
+        'endPoint'      => '',  // 设置HTTP接入域名
+        'accessId'      => '', //AccessKey 阿里云身份验证，在阿里云服务器管理控制台创建
+        'accessKey'     => '',  // SecretKey 阿里云身份验证，在阿里云服务器管理控制台创建
+        'securityToken' => '',  // 来自阿里云的securityToken
+        'topicName'     => '', // 所属的 Topic
+        'instanceId'    => null, // Topic所属实例ID，默认实例为空NULL
+        'consumer'      => '', // consumer
+        'groupId'       => '', // 分组
+        'messageTag'    => '',   // 标签
     ],
 ];
