@@ -27,8 +27,8 @@ class Client
     public function getClient(string $name = 'default'): HttpClient
     {
         $client = Context::get($this->getKey($name));
+        $this->configure($name);
         if (empty($client)) {
-            $this->configure($name);
             $client = Context::set($this->getKey($name), make(HttpClient::class, $this->ClientConfig));
         }
 
