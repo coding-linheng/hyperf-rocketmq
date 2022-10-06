@@ -1,4 +1,4 @@
-# qbhy/hyperf-auth
+# coding-linheng/hyperf-rocketmq
 
 基于阿里云的rocketmq-php-sdk 修改的 hyperf2.2 的 rocket 组件
 
